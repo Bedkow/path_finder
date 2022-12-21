@@ -45,7 +45,6 @@
 			margin: 0 auto;
 			display: block;
 		}
-
 	</style>
 
 	<script>
@@ -64,38 +63,69 @@
 			}
 		}
 
-        let startX = 0;
-        let startY = 0;
-        let finishX = 0;
-        let finishY = 0;
+		let startX = 0;
+		let startY = 0;
+		let finishX = 0;
+		let finishY = 0;
 
 		// create new Path object template to "hack" event listeners and exchange data between them
 		let pathObj = new Path(startX, startY, finishX, finishY);
 
+        // create Node class
+        class Node {
+            constructor(nodeX, nodeY, isEdge, isFinish){
+                this.nodeX = nodeX;
+                this.nodeY = nodeY;
+                this.isEdge = isEdge;
+                this.isFinish = isFinish;
+            }
+
+            getNodeCoords() {
+                return [this.nodeX, this.nodeY]
+            }
+
+            getIsFinish() {
+                return this.isFinish
+            }
+
+            getIsEdge() {
+                return this.isEdge
+            }
+        }
+
 		const canvas = document.getElementById('canvas');
 		const ctx = canvas.getContext('2d');
 
-        // define node drawing function
-        let drawNode = (x, y) => {
-            ctx.moveTo(x, y);
-            ctx.beginPath();
-            ctx.arc(x, y, 15, 0*Math.PI, 2*Math.PI);
-            ctx.closePath();
-            ctx.fillStyle = "red"
-            ctx.fill();
-            ctx.stroke();
-        }
+		// define node drawing function
+		let drawNode = (x, y, isEdge, isFinish) => {
+			let node = new Path2D();
+			ctx.moveTo(x, y);
+			ctx.beginPath();
+			node.arc(x, y, 15, 0 * Math.PI, 2 * Math.PI);
+			ctx.closePath();
+			if (isEdge) {
+				ctx.fillStyle = 'green';
+			} else {
+				ctx.fillStyle = 'red';
+			}
+			ctx.fill(node);
+			ctx.stroke();
+            // init Node object for later use
+            let createdNode = new Node(x, y, isEdge, isFinish)
+		};
 
-        let drawStartNode = (x, y) => {
-            drawNode(x, y);
-        }
+		//define starting node drawing function
+		let drawStartNode = (x, y) => {
+			drawNode(x, y, true);
+		};
 
-        let drawFinishNode = (x, y) => {
-            drawNode(x, y);
-        }
+		//define finishing node drawing function
+		let drawFinishNode = (x, y) => {
+			drawNode(x, y, true, true);
+		};
 
-        drawStartNode(50, canvas.height/2);
-        drawFinishNode(canvas.width - 50, canvas.height/2)
+		drawStartNode(50, canvas.height / 2);
+		drawFinishNode(canvas.width - 50, canvas.height / 2);
 
 		canvas.addEventListener('mousedown', (e) => {
 			//log start coords to console
@@ -125,30 +155,34 @@
 			ctx.lineTo(e.offsetX, e.offsetY);
 			ctx.stroke();
 
-            //calc middle of path coords
-            let diffX = pathObj.finishX - pathObj.startX;
-            let midX = pathObj.startX + (diffX / 2);
-            let diffY = pathObj.finishY - pathObj.startY;
-            let midY = pathObj.startY + (diffY / 2);
+			//calc middle of path coords
+			let diffX = pathObj.finishX - pathObj.startX;
+			let midX = pathObj.startX + diffX / 2;
+			let diffY = pathObj.finishY - pathObj.startY;
+			let midY = pathObj.startY + diffY / 2;
 
-            // draw circle in middle of path
-            ctx.moveTo(midX, midY);
-            ctx.beginPath();
-            ctx.arc(midX, midY, 15, 0*Math.PI, 2*Math.PI);
-            ctx.closePath();
-            ctx.fillStyle = "white"
-            ctx.fill();
-            ctx.stroke();
-            
-            //generate text with path length value, with timeout so is on top
-            setTimeout(() => {
-            ctx.font = '10px serif';
-            ctx.fillStyle = "#000000";
-            ctx.fillText(Math.round(pathObj.getPathLength()), midX-7.5, midY+3.25);
-            }, 1);
+			// draw circle in middle of path
+			ctx.moveTo(midX, midY);
+			ctx.beginPath();
+			ctx.arc(midX, midY, 15, 0 * Math.PI, 2 * Math.PI);
+			ctx.closePath();
+			ctx.fillStyle = 'white';
+			ctx.fill();
+			ctx.stroke();
 
-            // draw node at the end of path
-            drawNode(pathObj.finishX, pathObj.finishY);
+			//generate text with path length value, with timeout so is on top
+			setTimeout(() => {
+				ctx.font = '10px serif';
+				ctx.fillStyle = '#000000';
+				ctx.fillText(
+					Math.round(pathObj.getPathLength()),
+					midX - 7.5,
+					midY + 3.25
+				);
+			}, 1);
+
+			// draw node at the end of path
+			drawNode(pathObj.finishX, pathObj.finishY);
 		});
 	</script>
 </html>
