@@ -8,3 +8,5 @@ Tech:
 - HTML Canvas
 
 No bundlers, compilers, webpacks, and other crap. Just download the index.html file and run it in a modern browser (like the newest version of Google Chrome)
+
+*currently PC only*

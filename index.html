@@ -114,12 +114,34 @@
 			pathObj.finishX = e.offsetX;
 			pathObj.finishY = e.offsetY;
 
-			// get path lenght
+			// get path length
 			console.log(pathObj.getPathLength());
 
 			//stop draw line
 			ctx.lineTo(e.offsetX, e.offsetY);
 			ctx.stroke();
+
+            //calc middle of path coords
+            let diffX = pathObj.finishX - pathObj.startX;
+            let midX = pathObj.startX + (diffX / 2);
+            let diffY = pathObj.finishY - pathObj.startY;
+            let midY = pathObj.startY + (diffY / 2);
+
+            // draw circle in middle of path
+            ctx.moveTo(midX, midY);
+            ctx.beginPath();
+            ctx.arc(midX, midY, 15, 0*Math.PI, 2*Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = "white"
+            ctx.fill();
+            ctx.stroke();
+            
+            //generate text with path length value, with timeout so is on top
+            setTimeout(() => {
+            ctx.font = '10px serif';
+            ctx.fillStyle = "#000000";
+            ctx.fillText(Math.round(pathObj.getPathLength()), midX-7.5, midY+3.25);
+            }, 1);
 		});
 	</script>
 </html>
