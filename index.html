@@ -46,24 +46,6 @@
 			display: block;
 		}
 
-		.waypoint {
-			width: 30px;
-			height: 30px;
-			border-radius: 50%;
-			border: 1px red solid;
-			position: relative;
-			display: inline-block;
-		}
-
-		.start {
-			bottom: 265px;
-			left: 20px;
-		}
-
-		.finish {
-			bottom: 265px;
-			left: 620px;
-		}
 	</style>
 
 	<script>
@@ -87,11 +69,33 @@
         let finishX = 0;
         let finishY = 0;
 
-		// create new path object template
+		// create new Path object template to "hack" event listeners and exchange data between them
 		let pathObj = new Path(startX, startY, finishX, finishY);
 
 		const canvas = document.getElementById('canvas');
 		const ctx = canvas.getContext('2d');
+
+        // define node drawing function
+        let drawNode = (x, y) => {
+            ctx.moveTo(x, y);
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0*Math.PI, 2*Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = "red"
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        let drawStartNode = (x, y) => {
+            drawNode(x, y);
+        }
+
+        let drawFinishNode = (x, y) => {
+            drawNode(x, y);
+        }
+
+        drawStartNode(50, canvas.height/2);
+        drawFinishNode(canvas.width - 50, canvas.height/2)
 
 		canvas.addEventListener('mousedown', (e) => {
 			//log start coords to console
@@ -142,6 +146,9 @@
             ctx.fillStyle = "#000000";
             ctx.fillText(Math.round(pathObj.getPathLength()), midX-7.5, midY+3.25);
             }, 1);
+
+            // draw node at the end of path
+            drawNode(pathObj.finishX, pathObj.finishY);
 		});
 	</script>
 </html>
