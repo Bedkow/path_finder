@@ -93,6 +93,9 @@
             }
         }
 
+        // define array for all node objects
+        let allNodes = [];
+
 		const canvas = document.getElementById('canvas');
 		const ctx = canvas.getContext('2d');
 
@@ -110,8 +113,14 @@
 			}
 			ctx.fill(node);
 			ctx.stroke();
+
             // init Node object for later use
             let createdNode = new Node(x, y, isEdge, isFinish)
+
+            if (!createdNode.isFinish) {
+            allNodes.push(createdNode);
+            console.log(allNodes);
+            }
 		};
 
 		//define starting node drawing function
@@ -124,10 +133,27 @@
 			drawNode(x, y, true, true);
 		};
 
+        //draw start and finish nodes
 		drawStartNode(50, canvas.height / 2);
 		drawFinishNode(canvas.width - 50, canvas.height / 2);
 
+        // define object to exchange drawing condition between event listeners
+        let wasNodeClicked = {
+            clicked: false,
+        }
+
 		canvas.addEventListener('mousedown', (e) => {
+            if (allNodes.find(
+                (node) => {
+                    return (
+                        (
+                            node.nodeX <= e.offsetX + 15 && node.nodeX >= e.offsetX - 15
+                            ) && (
+                            node.nodeY <= e.offsetY + 15 && node.nodeY >= e.offsetY - 15
+                        )
+                    )
+                }
+            )) {
 			//log start coords to console
 			console.log(`FROM -> X: ${e.offsetX} Y: ${e.offsetY}`);
 
@@ -138,6 +164,7 @@
 			//start draw line
 			ctx.beginPath();
 			ctx.moveTo(e.offsetX, e.offsetY);
+            }
 		});
 
 		canvas.addEventListener('mouseup', (e) => {
