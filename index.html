@@ -154,6 +154,9 @@
                     )
                 }
             )) {
+            //change drawing condition to true
+            wasNodeClicked.clicked = true;
+
 			//log start coords to console
 			console.log(`FROM -> X: ${e.offsetX} Y: ${e.offsetY}`);
 
@@ -168,6 +171,7 @@
 		});
 
 		canvas.addEventListener('mouseup', (e) => {
+            if (wasNodeClicked.clicked) {
 			// log finish coords to console
 			console.log(`TO -> X: ${e.offsetX} Y: ${e.offsetY}`);
 
@@ -210,6 +214,7 @@
 
 			// draw node at the end of path
 			drawNode(pathObj.finishX, pathObj.finishY);
+        }
 		});
 	</script>
 </html>
