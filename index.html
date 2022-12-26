@@ -71,30 +71,30 @@
 		// create new Path object template to "hack" event listeners and exchange data between them
 		let pathObj = new Path(startX, startY, finishX, finishY);
 
-        // create Node class
-        class Node {
-            constructor(nodeX, nodeY, isEdge, isFinish){
-                this.nodeX = nodeX;
-                this.nodeY = nodeY;
-                this.isEdge = isEdge;
-                this.isFinish = isFinish;
-            }
+		// create Node class
+		class Node {
+			constructor(nodeX, nodeY, isEdge, isFinish) {
+				this.nodeX = nodeX;
+				this.nodeY = nodeY;
+				this.isEdge = isEdge;
+				this.isFinish = isFinish;
+			}
 
-            getNodeCoords() {
-                return [this.nodeX, this.nodeY]
-            }
+			getNodeCoords() {
+				return [this.nodeX, this.nodeY];
+			}
 
-            getIsFinish() {
-                return this.isFinish
-            }
+			getIsFinish() {
+				return this.isFinish;
+			}
 
-            getIsEdge() {
-                return this.isEdge
-            }
-        }
+			getIsEdge() {
+				return this.isEdge;
+			}
+		}
 
-        // define array for all node objects
-        let allNodes = [];
+		// define array for all node objects
+		let allNodes = [];
 
 		const canvas = document.getElementById('canvas');
 		const ctx = canvas.getContext('2d');
@@ -114,13 +114,13 @@
 			ctx.fill(node);
 			ctx.stroke();
 
-            // init Node object for later use
-            let createdNode = new Node(x, y, isEdge, isFinish)
+			// init Node object for later use
+			let createdNode = new Node(x, y, isEdge, isFinish);
 
-            if (!createdNode.isFinish) {
-            allNodes.push(createdNode);
-            console.log(allNodes);
-            }
+			// if (!createdNode.isFinish) {
+				allNodes.push(createdNode);
+				console.log(allNodes);
+			// }
 		};
 
 		//define starting node drawing function
@@ -131,90 +131,167 @@
 		//define finishing node drawing function
 		let drawFinishNode = (x, y) => {
 			drawNode(x, y, true, true);
+            let finishNodeX = x;
+            let finishNodeY = y;
 		};
 
-        //draw start and finish nodes
+		//draw start and finish nodes
 		drawStartNode(50, canvas.height / 2);
 		drawFinishNode(canvas.width - 50, canvas.height / 2);
 
-        // define object to exchange drawing condition between event listeners
-        let wasNodeClicked = {
-            clicked: false,
-        }
+		// define object to exchange drawing condition between event listeners
+		let wasNodeClicked = {
+			clicked: false,
+		};
 
 		canvas.addEventListener('mousedown', (e) => {
-            if (allNodes.find(
-                (node) => {
-                    return (
-                        (
-                            node.nodeX <= e.offsetX + 15 && node.nodeX >= e.offsetX - 15
-                            ) && (
-                            node.nodeY <= e.offsetY + 15 && node.nodeY >= e.offsetY - 15
-                        )
-                    )
-                }
-            )) {
-            //change drawing condition to true
-            wasNodeClicked.clicked = true;
+			if (
+				allNodes.find((node) => {
+					return (
+						node.nodeX <= e.offsetX + 15 &&
+						node.nodeX >= e.offsetX - 15 &&
+						node.nodeY <= e.offsetY + 15 &&
+						node.nodeY >= e.offsetY - 15
+					)
+				})
+			) {
+				// change drawing condition to true
+				wasNodeClicked.clicked = true;
 
-			//log start coords to console
-			console.log(`FROM -> X: ${e.offsetX} Y: ${e.offsetY}`);
+				//
+				let nodeToStartPath = allNodes.find((node) => {
+					return (
+						node.nodeX <= e.offsetX + 15 &&
+						node.nodeX >= e.offsetX - 15 &&
+						node.nodeY <= e.offsetY + 15 &&
+						node.nodeY >= e.offsetY - 15
+					);
+				});
 
-			// add current start coords
-			pathObj.startX = e.offsetX;
-			pathObj.startY = e.offsetY;
+				console.log(nodeToStartPath);
 
-			//start draw line
-			ctx.beginPath();
-			ctx.moveTo(e.offsetX, e.offsetY);
-            }
+				// log start coords to console
+				console.log(`FROM clicked -> X: ${e.offsetX} Y: ${e.offsetY}`);
+				console.log(
+					`FROM -> X: ${nodeToStartPath.nodeX} Y: ${nodeToStartPath.nodeY}`
+				);
+
+				// add current start coords
+				pathObj.startX = nodeToStartPath.nodeX;
+				pathObj.startY = nodeToStartPath.nodeY;
+
+				// start draw line
+				ctx.beginPath();
+				ctx.moveTo(nodeToStartPath.nodeX, nodeToStartPath.nodeY);
+			}
 		});
 
 		canvas.addEventListener('mouseup', (e) => {
-            if (wasNodeClicked.clicked) {
-			// log finish coords to console
-			console.log(`TO -> X: ${e.offsetX} Y: ${e.offsetY}`);
+			if (wasNodeClicked.clicked) {
+				if (
+					allNodes.find((node) => {
+						return (
+							(node.nodeX <= e.offsetX + 15 &&
+							node.nodeX >= e.offsetX - 15 &&
+							node.nodeY <= e.offsetY + 15 &&
+							node.nodeY >= e.offsetY - 15)
+						);
+					})
+				) {
+					let nodeToSnapTo = allNodes.find((node) => {
+						return (
+							node.nodeX <= e.offsetX + 15 &&
+							node.nodeX >= e.offsetX - 15 &&
+							node.nodeY <= e.offsetY + 15 &&
+							node.nodeY >= e.offsetY - 15
+						);
+					});
 
-			// add current finish coords
-			pathObj.finishX = e.offsetX;
-			pathObj.finishY = e.offsetY;
+					//add current snap coords
+					pathObj.finishX = nodeToSnapTo.nodeX;
+					pathObj.finishY = nodeToSnapTo.nodeY;
 
-			// get path length
-			console.log(pathObj.getPathLength());
+					ctx.lineTo(nodeToSnapTo.nodeX, nodeToSnapTo.nodeY);
+					ctx.stroke();
 
-			//stop draw line
-			ctx.lineTo(e.offsetX, e.offsetY);
-			ctx.stroke();
+					//calc middle of path coords
+					let diffX = pathObj.finishX - pathObj.startX;
+					let midX = pathObj.startX + diffX / 2;
+					let diffY = pathObj.finishY - pathObj.startY;
+					let midY = pathObj.startY + diffY / 2;
 
-			//calc middle of path coords
-			let diffX = pathObj.finishX - pathObj.startX;
-			let midX = pathObj.startX + diffX / 2;
-			let diffY = pathObj.finishY - pathObj.startY;
-			let midY = pathObj.startY + diffY / 2;
+                    // draw circle in middle of path
+                    if (pathObj.getPathLength() >= 50) {
+					ctx.moveTo(midX, midY);
+					ctx.beginPath();
+					ctx.arc(midX, midY, 15, 0 * Math.PI, 2 * Math.PI);
+					ctx.closePath();
+					ctx.fillStyle = 'white';
+					ctx.fill();
+					ctx.stroke();
+                    }
 
-			// draw circle in middle of path
-			ctx.moveTo(midX, midY);
-			ctx.beginPath();
-			ctx.arc(midX, midY, 15, 0 * Math.PI, 2 * Math.PI);
-			ctx.closePath();
-			ctx.fillStyle = 'white';
-			ctx.fill();
-			ctx.stroke();
+					//generate text with path length value, with timeout so is on top
+					setTimeout(() => {
+						ctx.font = '10px serif';
+						ctx.fillStyle = '#000000';
+						ctx.fillText(
+							Math.round(pathObj.getPathLength()),
+							midX - 7.5,
+							midY + 3.25
+						);
+					}, 1);
 
-			//generate text with path length value, with timeout so is on top
-			setTimeout(() => {
-				ctx.font = '10px serif';
-				ctx.fillStyle = '#000000';
-				ctx.fillText(
-					Math.round(pathObj.getPathLength()),
-					midX - 7.5,
-					midY + 3.25
-				);
-			}, 1);
+				} else {
 
-			// draw node at the end of path
-			drawNode(pathObj.finishX, pathObj.finishY);
-        }
+					// log finish coords to console
+					console.log(`TO -> X: ${e.offsetX} Y: ${e.offsetY}`);
+
+					// add current finish coords
+					pathObj.finishX = e.offsetX;
+					pathObj.finishY = e.offsetY;
+
+					// get path length
+					console.log(pathObj.getPathLength());
+
+					//stop draw line
+					ctx.lineTo(e.offsetX, e.offsetY);
+					ctx.stroke();
+
+					//calc middle of path coords
+					let diffX = pathObj.finishX - pathObj.startX;
+					let midX = pathObj.startX + diffX / 2;
+					let diffY = pathObj.finishY - pathObj.startY;
+					let midY = pathObj.startY + diffY / 2;
+
+					// draw circle in middle of path
+                    if (pathObj.getPathLength() >= 50) {
+					ctx.moveTo(midX, midY);
+					ctx.beginPath();
+					ctx.arc(midX, midY, 15, 0 * Math.PI, 2 * Math.PI);
+					ctx.closePath();
+					ctx.fillStyle = 'white';
+					ctx.fill();
+					ctx.stroke();
+                    }
+
+					//generate text with path length value, with timeout so is on top
+					setTimeout(() => {
+						ctx.font = '10px serif';
+						ctx.fillStyle = '#000000';
+						ctx.fillText(
+							Math.round(pathObj.getPathLength()),
+							midX - 7.5,
+							midY + 3.25
+						);
+					}, 1);
+
+					// draw node at the end of path
+					drawNode(pathObj.finishX, pathObj.finishY);
+				}
+			}
+            //return click state to default false
+			wasNodeClicked.clicked = false;
 		});
 	</script>
 </html>
