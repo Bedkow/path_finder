@@ -1,6 +1,6 @@
 *under development*
 
-### A single file app that lets the user draw paths from point A to point B and uses an algorithm to choose the shortest one.
+### A single file app that lets the user draw paths from point A to point B ~~and uses an algorithm to choose the shortest one~~.
 
 Tech:
 - Vanilla JavaScript (ES6+)
